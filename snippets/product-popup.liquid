@@ -1,0 +1,38 @@
+<dialog id="GiftPopupDialog-{{ section.id }}" class="gift-popup__dialog" data-popup-dialog aria-labelledby="GiftPopupTitle-{{ section.id }}">
+  <button type="button" class="gift-popup__close" data-popup-close aria-label="{{ close_label | escape }}">
+    <span class="gift-popup__close-icon" aria-hidden="true"></span>
+  </button>
+  <div class="gift-popup__layout">
+    <div class="gift-popup__media is-empty" data-popup-media>
+      <img alt="" width="900" height="900" data-popup-image hidden>
+    </div>
+    <form class="gift-popup__details" data-popup-form>
+      <h2 class="gift-popup__title" id="GiftPopupTitle-{{ section.id }}" data-popup-title></h2>
+      <p class="gift-popup__price" data-popup-price></p>
+      <div class="gift-popup__description" data-popup-description></div>
+      <div data-popup-options></div>
+      <p class="gift-popup__availability" data-popup-availability></p>
+      <div class="gift-popup__quantity">
+        <span class="gift-popup__quantity-label" id="GiftPopupQty-{{ section.id }}">{{ quantity_label | escape }}</span>
+        <div class="gift-popup__qty">
+          <button type="button" data-qty-minus aria-label="{{ decrease_label | escape }}">−</button>
+          <input
+            class="gift-popup__qty-input"
+            data-qty-input
+            type="number"
+            inputmode="numeric"
+            value="1"
+            min="1"
+            aria-labelledby="GiftPopupQty-{{ section.id }}"
+          >
+          <button type="button" data-qty-plus aria-label="{{ increase_label | escape }}">+</button>
+        </div>
+      </div>
+      <p class="gift-popup__bundle" data-popup-bundle hidden></p>
+      <p class="gift-popup__status" data-popup-status role="status"></p>
+      <button type="submit" class="gift-popup__submit" data-popup-submit>
+        <span data-popup-submit-label>{{ add_label | escape }}</span>
+      </button>
+    </form>
+  </div>
+</dialog>

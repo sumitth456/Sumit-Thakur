@@ -1,0 +1,182 @@
+{{ 'custom-banner.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'custom-banner.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign mobile_image = section.settings.image_mobile
+  assign desktop_image = section.settings.image
+-%}
+
+<gift-guide-banner class="gift-banner" id="GiftBanner-{{ section.id }}">
+  <div class="gift-banner__canvas">
+    <div class="gift-banner__art" aria-hidden="true">
+      {%- if desktop_image != blank or mobile_image != blank -%}
+        <picture>
+          {%- if mobile_image != blank -%}
+            <source
+              media="(max-width: 749px)"
+              srcset="{{ mobile_image | image_url: width: 800 }} 800w, {{ mobile_image | image_url: width: 1200 }} 1200w"
+              sizes="100vw"
+            >
+          {%- endif -%}
+          {%- if desktop_image != blank -%}
+            {{
+              desktop_image
+              | image_url: width: 2000
+              | image_tag:
+                class: 'gift-banner__image',
+                widths: '600, 900, 1200, 1600, 2000',
+                sizes: '(min-width: 1200px) 1200px, 100vw',
+                alt: '',
+                loading: 'eager'
+            }}
+          {%- else -%}
+            {{
+              mobile_image
+              | image_url: width: 1400
+              | image_tag:
+                class: 'gift-banner__image',
+                widths: '600, 900, 1200, 1400',
+                sizes: '100vw',
+                alt: '',
+                loading: 'eager'
+            }}
+          {%- endif -%}
+        </picture>
+      {%- else -%}
+        <img
+          src="{{ 'gift-guide-art.svg' | asset_url }}"
+          alt=""
+          width="1440"
+          height="680"
+          loading="eager"
+        >
+      {%- endif -%}
+    </div>
+
+    <div class="gift-banner__top">
+      {%- if section.settings.top_text != blank -%}
+        <p class="gift-banner__brand">{{ section.settings.top_text | escape }}</p>
+      {%- else -%}
+        <span></span>
+      {%- endif -%}
+
+      {%- if section.settings.center_text != blank -%}
+        <p class="gift-banner__center">{{ section.settings.center_text | escape }}</p>
+      {%- else -%}
+        <span></span>
+      {%- endif -%}
+
+      <div class="gift-banner__top-action">
+        {% render 'gift-banner-button',
+          label: section.settings.highlight_label,
+          link: section.settings.highlight_link,
+          style: 'accent',
+          icon: false
+        %}
+      </div>
+    </div>
+
+    <div class="gift-banner__copy">
+      {%- if section.settings.heading != blank -%}
+        <h1 class="gift-banner__heading">{{ section.settings.heading | escape }}</h1>
+      {%- endif -%}
+      {%- if section.settings.text != blank -%}
+        <div class="gift-banner__text">{{ section.settings.text }}</div>
+      {%- endif -%}
+      {% render 'gift-banner-button',
+        label: section.settings.button_label,
+        link: section.settings.button_link,
+        style: 'solid',
+        icon: true
+      %}
+    </div>
+  </div>
+</gift-guide-banner>
+
+{% schema %}
+{
+  "name": "Custom banner",
+  "tag": "section",
+  "class": "gift-banner-section",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Top bar"
+    },
+    {
+      "type": "text",
+      "id": "top_text",
+      "label": "Left text",
+      "default": "Bild vision"
+    },
+    {
+      "type": "text",
+      "id": "center_text",
+      "label": "Center text",
+      "default": "Seasonal edit"
+    },
+    {
+      "type": "text",
+      "id": "highlight_label",
+      "label": "Highlight button label",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "highlight_link",
+      "label": "Highlight button link"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Gift Guide"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description",
+      "default": "<p>A short edit of pieces worth giving, chosen for the people who already have enough of everything else.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Illustration"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Desktop illustration",
+      "info": "Replaces the built-in line drawing. Use the exported Figma banner for an exact match."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile illustration",
+      "info": "Optional. The desktop illustration is used when this is empty."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom banner"
+    }
+  ]
+}
+{% endschema %}
