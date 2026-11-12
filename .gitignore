@@ -1,0 +1,28 @@
+# OS and editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+
+# Dependencies and local tooling
+node_modules/
+.shopify/
+
+# Theme export and local audit files — never commit store packages or working notes
+*.zip
+_audit_assets/
+_audit_extract/
+_parse_notion.js
+
+# Secrets and local environment
+.env
+.env.*
+*.pem
+config.yml
+shopify.theme.toml
+.theme-check.yml
+
+# Logs
+*.log
+npm-debug.log*

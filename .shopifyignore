@@ -1,0 +1,9 @@
+*.zip
+_audit_assets/
+_audit_extract/
+_parse_notion.js
+node_modules/
+.shopify/
+.env
+.env.*
+*.log
