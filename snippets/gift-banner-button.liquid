@@ -1,0 +1,23 @@
+{%- comment -%}
+  Animated banner button. Label and link are supplied by the banner section.
+  The second label is hidden from assistive tech and used only for the slide animation.
+{%- endcomment -%}
+{%- if label != blank -%}
+  {%- if link != blank -%}
+    <a class="gift-banner__button gift-banner__button--{{ style | default: 'solid' }}" href="{{ link }}">
+  {%- else -%}
+    <button type="button" class="gift-banner__button gift-banner__button--{{ style | default: 'solid' }}">
+  {%- endif -%}
+    <span class="gift-banner__button-label">
+      <span>{{ label | escape }}</span>
+      <span aria-hidden="true">{{ label | escape }}</span>
+    </span>
+    {%- if icon -%}
+      <span class="gift-banner__button-icon" aria-hidden="true"></span>
+    {%- endif -%}
+  {%- if link != blank -%}
+    </a>
+  {%- else -%}
+    </button>
+  {%- endif -%}
+{%- endif -%}

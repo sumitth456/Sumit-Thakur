@@ -1,0 +1,277 @@
+{{ 'custom-product-grid.css' | asset_url | stylesheet_tag }}
+{{ 'product-popup.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product-popup.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'custom-product-grid.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign money_format = shop.money_format
+  if settings.currency_code_enabled
+    assign money_format = shop.money_with_currency_format
+  endif
+
+  assign jacket_product = blank
+  assign wanted_title = section.settings.jacket_title | downcase | strip
+  if collections.all != blank and wanted_title != blank
+    for candidate in collections.all.products
+      assign candidate_title = candidate.title | downcase | strip
+      if candidate_title == wanted_title
+        assign jacket_product = candidate
+        break
+      endif
+    endfor
+  endif
+-%}
+
+<gift-product-grid class="gift-grid" id="GiftGrid-{{ section.id }}">
+  <ul class="gift-grid__list">
+    {%- for block in section.blocks -%}
+      {%- assign product = block.settings.product -%}
+      {%- if product != blank or request.design_mode -%}
+        <li {{ block.shopify_attributes }}>
+        {%- if product != blank -%}
+          {%- liquid
+            assign card_price = product.price | money
+            if settings.currency_code_enabled
+              assign card_price = product.price | money_with_currency
+            endif
+            assign image_alt = product.featured_image.alt | default: product.title
+          -%}
+          <article class="gift-card">
+            <button
+              type="button"
+              class="gift-card__open"
+              data-gift-open="{{ block.id }}"
+              aria-haspopup="dialog"
+              aria-controls="GiftPopupDialog-{{ section.id }}"
+            >
+              <span class="gift-card__media">
+                {%- if product.featured_image != blank -%}
+                  {{
+                    product.featured_image
+                    | image_url: width: 900
+                    | image_tag:
+                      class: 'gift-card__image',
+                      widths: '240, 360, 540, 720, 900',
+                      sizes: '(min-width: 990px) 30vw, 45vw',
+                      alt: image_alt,
+                      loading: 'lazy'
+                  }}
+                {%- endif -%}
+              </span>
+              <span class="gift-card__meta">
+                <span class="gift-card__title">{{ product.title | escape }}</span>
+                <span class="gift-card__price">{{ card_price }}</span>
+                {%- unless product.available -%}
+                  <span class="gift-card__note">{{ section.settings.sold_out_label | escape }}</span>
+                {%- endunless -%}
+              </span>
+              <span class="gift-card__cta">{{ section.settings.card_button_label | escape }}</span>
+            </button>
+          </article>
+          {%- capture product_payload -%}{% render 'gift-product-json', product: product %}{%- endcapture -%}
+          <script type="application/json" data-gift-product="{{ block.id }}">{{ product_payload | replace: '</', '<\/' }}</script>
+        {%- elsif request.design_mode -%}
+          <div class="gift-card gift-card--empty">
+            <div class="gift-card__media"></div>
+            <p class="gift-card__empty-label">Select a product</p>
+          </div>
+        {%- endif -%}
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+
+  <product-popup id="GiftPopup-{{ section.id }}">
+    <script type="application/json" data-popup-config>
+      {
+        "moneyFormat": {{ money_format | json }},
+        "jacketTitle": {{ section.settings.jacket_title | json }},
+        "cartUrl": {{ routes.cart_url | json }},
+        "cartAddUrl": {{ routes.cart_add_url | json }},
+        "messages": {
+          "add": {{ section.settings.add_label | json }},
+          "soldOut": {{ section.settings.sold_out_label | json }},
+          "unavailable": {{ section.settings.unavailable_label | json }},
+          "inStock": {{ section.settings.in_stock_label | json }},
+          "added": {{ section.settings.added_message | json }},
+          "error": {{ section.settings.error_message | json }},
+          "bundleNotice": {{ section.settings.bundle_notice | json }},
+          "bundleAdded": {{ section.settings.bundle_added | json }},
+          "bundleAlready": {{ section.settings.bundle_already | json }},
+          "bundleMissing": {{ section.settings.bundle_missing | json }},
+          "bundleUnavailable": {{ section.settings.bundle_unavailable | json }},
+          "bundleCart": {{ section.settings.bundle_cart | json }}
+        }
+      }
+    </script>
+    {%- if jacket_product != blank -%}
+      {%- capture jacket_payload -%}{% render 'gift-product-json', product: jacket_product, compact: true %}{%- endcapture -%}
+      <script type="application/json" data-gift-jacket>{{ jacket_payload | replace: '</', '<\/' }}</script>
+    {%- endif -%}
+    {% render 'product-popup',
+      close_label: section.settings.close_label,
+      quantity_label: section.settings.quantity_label,
+      decrease_label: section.settings.decrease_label,
+      increase_label: section.settings.increase_label,
+      add_label: section.settings.add_label
+    %}
+  </product-popup>
+</gift-product-grid>
+
+{% schema %}
+{
+  "name": "Custom product grid",
+  "tag": "section",
+  "class": "gift-grid-section",
+  "max_blocks": 6,
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "card_button_label",
+      "label": "Card button label",
+      "default": "Add to cart"
+    },
+    {
+      "type": "header",
+      "content": "Popup"
+    },
+    {
+      "type": "text",
+      "id": "add_label",
+      "label": "Add to cart label",
+      "default": "Add to cart"
+    },
+    {
+      "type": "text",
+      "id": "sold_out_label",
+      "label": "Sold out label",
+      "default": "Sold out"
+    },
+    {
+      "type": "text",
+      "id": "unavailable_label",
+      "label": "Unavailable label",
+      "default": "Unavailable"
+    },
+    {
+      "type": "text",
+      "id": "in_stock_label",
+      "label": "In stock label",
+      "default": "In stock"
+    },
+    {
+      "type": "text",
+      "id": "quantity_label",
+      "label": "Quantity label",
+      "default": "Quantity"
+    },
+    {
+      "type": "text",
+      "id": "decrease_label",
+      "label": "Decrease quantity label",
+      "default": "Decrease quantity"
+    },
+    {
+      "type": "text",
+      "id": "increase_label",
+      "label": "Increase quantity label",
+      "default": "Increase quantity"
+    },
+    {
+      "type": "text",
+      "id": "close_label",
+      "label": "Close label",
+      "default": "Close"
+    },
+    {
+      "type": "text",
+      "id": "added_message",
+      "label": "Added message",
+      "default": "Added to cart."
+    },
+    {
+      "type": "text",
+      "id": "error_message",
+      "label": "Error message",
+      "default": "Could not add this product to the cart."
+    },
+    {
+      "type": "header",
+      "content": "Black and Medium bundle"
+    },
+    {
+      "type": "text",
+      "id": "jacket_title",
+      "label": "Companion product title",
+      "default": "Soft Winter Jacket",
+      "info": "When Color is Black and Size is Medium, the first available variant of this product is added. Option names are matched, not positions. Variant IDs are never stored in the theme."
+    },
+    {
+      "type": "text",
+      "id": "bundle_notice",
+      "label": "Bundle notice",
+      "default": "Black / Medium includes a Soft Winter Jacket."
+    },
+    {
+      "type": "text",
+      "id": "bundle_added",
+      "label": "Bundle added message",
+      "default": "Added to cart. Soft Winter Jacket was added with this item."
+    },
+    {
+      "type": "text",
+      "id": "bundle_already",
+      "label": "Jacket already in cart message",
+      "default": "Added to cart. Soft Winter Jacket is already in your cart."
+    },
+    {
+      "type": "text",
+      "id": "bundle_missing",
+      "label": "Jacket missing message",
+      "default": "Added to cart. Soft Winter Jacket could not be found, so it was not added."
+    },
+    {
+      "type": "text",
+      "id": "bundle_unavailable",
+      "label": "Jacket unavailable message",
+      "default": "Added to cart. Soft Winter Jacket is unavailable and was not added."
+    },
+    {
+      "type": "text",
+      "id": "bundle_cart",
+      "label": "Cart check failed message",
+      "default": "Added to cart. Soft Winter Jacket was not added because the cart could not be checked."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom product grid",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ]
+}
+{% endschema %}
